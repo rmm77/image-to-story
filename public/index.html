@@ -1,0 +1,29 @@
+<!doctype html><meta charset="utf-8">
+<h1>Image → Story (Claude)</h1>
+<input type="file" id="file" accept="image/*">
+<button id="go">Make Story</button>
+<pre id="out" style="white-space:pre-wrap"></pre>
+<script>
+const api = "https://YOUR-RENDER-URL"; // set after deploy
+async function main() {
+  const f = document.getElementById("file").files[0];
+  if (!f) return alert("Pick an image first.");
+
+  // 1) Get presigned PUT
+  const up = await fetch(api + "/upload-url", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({ filename: f.name, content_type: f.type })
+  }).then(r => r.json());
+
+  // 2) Upload to S3
+  await fetch(up.put_url, { method: "PUT", body: f });
+
+  // 3) Ask for a story
+  const qs = new URLSearchParams({ key: up.key });
+  const res = await fetch(api + "/generate?" + qs);
+  const data = await res.json();
+  document.getElementById("out").textContent = data.story || "No story";
+}
+document.getElementById("go").onclick = main;
+</script>

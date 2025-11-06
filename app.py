@@ -6,6 +6,17 @@ from anthropic import Anthropic
 
 app = FastAPI(title="Image → Story (Claude)")
 
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
+
+# Serve the /public directory where your index.html lives
+app.mount("/public", StaticFiles(directory="public"), name="public")
+
+@app.get("/")
+def serve_home():
+    return FileResponse("public/index.html")
+
+
 @app.get("/")
 def root():
     return {"ok": True, "service": "claude-image-story", "endpoints": ["/upload-url (POST)", "/generate (GET)"]}

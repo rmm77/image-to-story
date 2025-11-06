@@ -6,6 +6,10 @@ from anthropic import Anthropic
 
 app = FastAPI(title="Image → Story (Claude)")
 
+@app.get("/")
+def root():
+    return {"ok": True, "service": "claude-image-story", "endpoints": ["/upload-url (POST)", "/generate (GET)"]}
+
 # --- S3 client for pre-signed URLs ---
 s3 = boto3.client(
     "s3",

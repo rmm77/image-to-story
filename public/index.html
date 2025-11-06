@@ -1,29 +1,48 @@
-<!doctype html><meta charset="utf-8">
-<h1>Image → Story (Claude)</h1>
-<input type="file" id="file" accept="image/*">
-<button id="go">Make Story</button>
-<pre id="out" style="white-space:pre-wrap"></pre>
 <script>
-const api = "https://image-to-story.onrender.com"; // set after deploy
+const api = window.location.origin; // same host as your FastAPI app
+
 async function main() {
-  const f = document.getElementById("file").files[0];
-  if (!f) return alert("Pick an image first.");
+  const out = document.getElementById("out");
+  out.textContent = "Uploading...";
+  try {
+    const f = document.getElementById("file").files[0];
+    if (!f) return alert("Pick an image first.");
 
-  // 1) Get presigned PUT
-  const up = await fetch(api + "/upload-url", {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({ filename: f.name, content_type: f.type })
-  }).then(r => r.json());
+    // 1) Get presigned PUT
+    const upRes = await fetch(api + "/upload-url", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({ filename: f.name, content_type: f.type })
+    });
+    if (!upRes.ok) {
+      const err = await upRes.text();
+      throw new Error(`upload-url failed: ${upRes.status} ${err}`);
+    }
+    const up = await upRes.json();
+    if (!up.put_url || !up.key) throw new Error("upload-url returned no put_url/key");
 
-  // 2) Upload to S3
-  await fetch(up.put_url, { method: "PUT", body: f });
+    // 2) Upload to S3 (must include Content-Type to match the presign)
+    const put = await fetch(up.put_url, { method: "PUT", body: f, headers: {"Content-Type": f.type} });
+    if (!put.ok) {
+      const err = await put.text();
+      throw new Error(`S3 PUT failed: ${put.status} ${err}`);
+    }
 
-  // 3) Ask for a story
-  const qs = new URLSearchParams({ key: up.key });
-  const res = await fetch(api + "/generate?" + qs);
-  const data = await res.json();
-  document.getElementById("out").textContent = data.story || "No story";
+    out.textContent = "Generating story...";
+
+    // 3) Ask backend to generate
+    const genRes = await fetch(api + "/generate?key=" + encodeURIComponent(up.key));
+    const body = await genRes.text(); // read text first for better error messages
+    let data;
+    try { data = JSON.parse(body); } catch { throw new Error(`/generate non-JSON: ${body}`); }
+    if (!genRes.ok) throw new Error(`generate failed ${genRes.status}: ${data.detail || body}`);
+    if (!data.story) throw new Error("No story in response");
+
+    out.textContent = data.story;
+  } catch (e) {
+    console.error(e);
+    out.textContent = "Error: " + e.message;
+  }
 }
 document.getElementById("go").onclick = main;
 </script>

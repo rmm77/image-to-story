@@ -1,48 +1,56 @@
-<script>
-const api = window.location.origin; // same host as your FastAPI app
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Image → Story (Claude)</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    body{font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;max-width:720px;margin:40px auto;padding:0 16px}
+    h1{font-size:22px;margin-bottom:12px}
+    #out{white-space:pre-wrap;border:1px solid #ddd;padding:12px;border-radius:8px;min-height:120px;margin-top:12px}
+    button{padding:8px 14px;border-radius:8px;border:1px solid #ccc;background:#f6f6f6;cursor:pointer}
+    button:hover{background:#eee}
+  </style>
+</head>
+<body>
+  <h1>Image → Story (Claude)</h1>
 
-async function main() {
-  const out = document.getElementById("out");
-  out.textContent = "Uploading...";
-  try {
-    const f = document.getElementById("file").files[0];
-    if (!f) return alert("Pick an image first.");
+  <input type="file" id="file" accept="image/*">
+  <button id="go">Make Story</button>
+  <div id="out">Pick an image and click “Make Story”.</div>
 
-    // 1) Get presigned PUT
-    const upRes = await fetch(api + "/upload-url", {
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({ filename: f.name, content_type: f.type })
-    });
-    if (!upRes.ok) {
-      const err = await upRes.text();
-      throw new Error(`upload-url failed: ${upRes.status} ${err}`);
-    }
-    const up = await upRes.json();
-    if (!up.put_url || !up.key) throw new Error("upload-url returned no put_url/key");
+  <script>
+  (function () {
+    const api = window.location.origin; // same domain as your FastAPI app
+    const out = document.getElementById("out");
+    const btn = document.getElementById("go");
+    const fileInput = document.getElementById("file");
 
-    // 2) Upload to S3 (must include Content-Type to match the presign)
-    const put = await fetch(up.put_url, { method: "PUT", body: f, headers: {"Content-Type": f.type} });
-    if (!put.ok) {
-      const err = await put.text();
-      throw new Error(`S3 PUT failed: ${put.status} ${err}`);
-    }
+    function show(msg){ out.textContent = msg; }
 
-    out.textContent = "Generating story...";
+    async function main() {
+      try {
+        const f = fileInput.files[0];
+        if (!f) { alert("Pick an image first."); return; }
 
-    // 3) Ask backend to generate
-    const genRes = await fetch(api + "/generate?key=" + encodeURIComponent(up.key));
-    const body = await genRes.text(); // read text first for better error messages
-    let data;
-    try { data = JSON.parse(body); } catch { throw new Error(`/generate non-JSON: ${body}`); }
-    if (!genRes.ok) throw new Error(`generate failed ${genRes.status}: ${data.detail || body}`);
-    if (!data.story) throw new Error("No story in response");
+        show("Requesting upload URL...");
+        const upRes = await fetch(api + "/upload-url", {
+          method: "POST",
+          headers: {"Content-Type":"application/json"},
+          body: JSON.stringify({ filename: f.name, content_type: f.type })
+        });
+        const upText = await upRes.text();
+        if (!upRes.ok) throw new Error(`upload-url ${upRes.status}: ${upText}`);
+        let up;
+        try { up = JSON.parse(upText); } catch(e) { throw new Error("upload-url non-JSON: " + upText); }
+        if (!up.put_url || !up.key) throw new Error("upload-url missing put_url/key");
 
-    out.textContent = data.story;
-  } catch (e) {
-    console.error(e);
-    out.textContent = "Error: " + e.message;
-  }
-}
-document.getElementById("go").onclick = main;
-</script>
+        show("Uploading to S3...");
+        const putRes = await fetch(up.put_url, { method: "PUT", body: f, headers: {"Content-Type": f.type} });
+        if (!putRes.ok) {
+          const t = await putRes.text();
+          throw new Error(`S3 PUT ${putRes.status}: ${t}`);
+        }
+
+        show("Generating story with Claude...");
+        const genRes = await fetch(api +

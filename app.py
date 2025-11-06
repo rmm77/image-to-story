@@ -1,4 +1,5 @@
 import os, boto3
+from botocore.config import Config
 from fastapi import FastAPI, HTTPException, Query
 from pydantic import BaseModel
 from datetime import timedelta
@@ -27,6 +28,7 @@ s3 = boto3.client(
     region_name=os.getenv("AWS_REGION", "us-east-2"),
     aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
     aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
+    config=Config(signature_version="s3v4"),
 )
 BUCKET = os.getenv("S3_BUCKET")
 

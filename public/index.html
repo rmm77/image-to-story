@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Image → Story (Claude)</title>
+  <title>Image → Story Generator</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <style>
     body{font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;max-width:720px;margin:40px auto;padding:0 16px}
@@ -13,7 +13,7 @@
   </style>
 </head>
 <body>
-  <h1>Image → Story (Claude)</h1>
+  <h1>Image → Story Generator</h1>
 
   <input type="file" id="file" accept="image/*">
 <button id="go" onclick="main()">Make Story</button>
@@ -54,7 +54,7 @@
         throw new Error(`S3 PUT ${putRes.status}: ${t}`);
       }
 
-      show("Generating story with Claude...");
+      show("Generating story with your image...");
       const genRes = await fetch(api + "/generate?key=" + encodeURIComponent(up.key));
       const genText = await genRes.text();
       if (!genRes.ok) throw new Error(`generate ${genRes.status}: ${genText}`);

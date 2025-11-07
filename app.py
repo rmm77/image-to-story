@@ -34,7 +34,7 @@ BUCKET = os.getenv("S3_BUCKET")
 
 # --- Anthropic client ---
 anthropic = Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
-MODEL = os.getenv("CLAUDE_MODEL", "claude-3-5-sonnet-20241022")  # latest Sonnet
+MODEL = os.getenv("CLAUDE_MODEL", "claude-sonnet-4-5-20250929")  # latest Sonnet
 MAX_TOKENS = int(os.getenv("MAX_TOKENS", "1200"))  # ~1–2 pages
 
 

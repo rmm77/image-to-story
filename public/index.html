@@ -14,7 +14,7 @@
   </style>
 </head>
 <body>
-  <h1>Image → Story Generator</h1>
+  <h1>Welcome to Image → Story Generator</h1>
 
   <input type="file" id="file" accept="image/*">
 <button id="go" onclick="main()">Make Story</button>
@@ -55,7 +55,7 @@
         throw new Error(`S3 PUT ${putRes.status}: ${t}`);
       }
 
-      show("Generating story with your image...");
+      show("Generating story with your image. Please wait 10-15 seconds...");
       const genRes = await fetch(api + "/generate?key=" + encodeURIComponent(up.key));
       const genText = await genRes.text();
       if (!genRes.ok) throw new Error(`generate ${genRes.status}: ${genText}`);

@@ -6,68 +6,109 @@
   <title>Image → Story Generator</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <style>
-    body{font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;max-width:720px;margin:40px auto;padding:0 16px}
-    h1{font-size:22px;margin-bottom:12px}
-    #out{white-space:pre-wrap;border:1px solid #ddd;padding:12px;border-radius:8px;min-height:120px;margin-top:12px}
-    button{padding:8px 14px;border-radius:8px;border:1px solid #ccc;background:#f6f6f6;cursor:pointer}
-    button:hover{background:#eee}
+    /* 📖 Paperback novel feel */
+    body {
+      font-family: Georgia, 'Times New Roman', serif;
+      max-width: 720px;
+      margin: 40px auto;
+      padding: 0 16px;
+      background-color: #fdf6e3; /* light cream / paper tone */
+      color: #2b2b2b;            /* soft dark text for readability */
+      line-height: 1.6;
+    }
+
+    h1 {
+      font-size: 24px;
+      margin-bottom: 16px;
+      text-align: center;
+      color: #3a2e1f; /* slightly warmer tone for heading */
+    }
+
+    #out {
+      white-space: pre-wrap;
+      border: 1px solid #d6c7a1;
+      padding: 14px;
+      border-radius: 8px;
+      min-height: 140px;
+      margin-top: 16px;
+      background-color: #fffaf0; /* even lighter “page” color */
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+    }
+
+    input[type="file"] {
+      margin-right: 8px;
+    }
+
+    button {
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: 1px solid #cbbf9f;
+      background: #f5e6c8;
+      color: #2b2b2b;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background 0.2s, box-shadow 0.2s;
+    }
+
+    button:hover {
+      background: #f0dcae;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
   </style>
 </head>
 <body>
   <h1>Welcome to Image → Story Generator</h1>
 
   <input type="file" id="file" accept="image/*">
-<button id="go" onclick="main()">Make Story</button>
-<div id="out">Pick an image and click “Make Story”.</div>
+  <button id="go" onclick="main()">Make Story</button>
+  <div id="out">Pick an image and click “Make Story”.</div>
 
-<script>
-  // Use same origin as the API since the page is served by FastAPI
-  const api = window.location.origin;
+  <script>
+    const api = window.location.origin;
 
-  function show(msg) {
-    const out = document.getElementById("out");
-    if (out) out.textContent = msg;
-  }
-
-  // Make main global so the inline onclick can see it
-  window.main = async function () {
-    try {
-      const fileInput = document.getElementById("file");
-      const f = fileInput && fileInput.files && fileInput.files[0];
-      if (!f) { alert("Pick an image first."); return; }
-
-      show("Requesting upload URL...");
-      const upRes = await fetch(api + "/upload-url", {
-        method: "POST",
-        headers: {"Content-Type":"application/json"},
-        body: JSON.stringify({ filename: f.name, content_type: f.type })
-      });
-      const upText = await upRes.text();
-      if (!upRes.ok) throw new Error(`upload-url ${upRes.status}: ${upText}`);
-      let up;
-      try { up = JSON.parse(upText); } catch { throw new Error("upload-url non-JSON: " + upText); }
-      if (!up.put_url || !up.key) throw new Error("upload-url missing put_url/key");
-
-      show("Uploading to S3...");
-      const putRes = await fetch(up.put_url, { method: "PUT", body: f, headers: { "Content-Type": f.type } });
-      if (!putRes.ok) {
-        const t = await putRes.text();
-        throw new Error(`S3 PUT ${putRes.status}: ${t}`);
-      }
-
-      show("Generating story with your image. Please wait 10-15 seconds...");
-      const genRes = await fetch(api + "/generate?key=" + encodeURIComponent(up.key));
-      const genText = await genRes.text();
-      if (!genRes.ok) throw new Error(`generate ${genRes.status}: ${genText}`);
-      let data;
-      try { data = JSON.parse(genText); } catch { throw new Error("generate non-JSON: " + genText); }
-      if (!data.story) throw new Error("No story in response.");
-      show(data.story);
-    } catch (e) {
-      console.error(e);
-      show("Error: " + (e?.message || e));
+    function show(msg) {
+      const out = document.getElementById("out");
+      if (out) out.textContent = msg;
     }
-  };
-</script>
+
+    window.main = async function () {
+      try {
+        const fileInput = document.getElementById("file");
+        const f = fileInput && fileInput.files && fileInput.files[0];
+        if (!f) { alert("Pick an image first."); return; }
+
+        show("Requesting upload URL...");
+        const upRes = await fetch(api + "/upload-url", {
+          method: "POST",
+          headers: {"Content-Type":"application/json"},
+          body: JSON.stringify({ filename: f.name, content_type: f.type })
+        });
+        const upText = await upRes.text();
+        if (!upRes.ok) throw new Error(`upload-url ${upRes.status}: ${upText}`);
+        let up;
+        try { up = JSON.parse(upText); } catch { throw new Error("upload-url non-JSON: " + upText); }
+        if (!up.put_url || !up.key) throw new Error("upload-url missing put_url/key");
+
+        show("Uploading to S3...");
+        const putRes = await fetch(up.put_url, { method: "PUT", body: f, headers: { "Content-Type": f.type } });
+        if (!putRes.ok) {
+          const t = await putRes.text();
+          throw new Error(`S3 PUT ${putRes.status}: ${t}`);
+        }
+
+        show("Generating story with your image. Please wait 20–30 seconds...");
+        const genRes = await fetch(api + "/generate?key=" + encodeURIComponent(up.key));
+        const genText = await genRes.text();
+        if (!genRes.ok) throw new Error(`generate ${genRes.status}: ${genText}`);
+        let data;
+        try { data = JSON.parse(genText); } catch { throw new Error("generate non-JSON: " + genText); }
+        if (!data.story) throw new Error("No story in response.");
+        show(data.story);
+      } catch (e) {
+        console.error(e);
+        show("Error: " + (e?.message || e));
+      }
+    };
+  </script>
 </body>
 </html>

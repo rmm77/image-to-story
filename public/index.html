@@ -6,46 +6,153 @@
   <title>StoryLens – Turn Images Into Stories</title>
   <link rel="icon" href="/public/storylens.png" type="image/png">
   <style>
-    :root { --card:#fff; --muted:#666; --border:#e9e9ef; --bg:#f6f6f9; --brand:#007bff; --brandH:#005fc2; }
+    :root {
+      --page-bg: #f8f5e7;        /* soft paper background */
+      --card: #fdfaf2;           /* light cream card */
+      --ink: #2c2b27;            /* book ink text */
+      --muted: #6b6456;          /* aged gray-brown */
+      --border: #e4dfd2;         /* parchment edge tone */
+      --accent: #6e5334;         /* warm brown accent */
+      --accentH: #8a6b47;        /* hover accent */
+    }
+
     * { box-sizing: border-box; }
+
     body {
-      font-family: 'Inter', system-ui, -apple-system, Roboto, Arial, sans-serif;
-      background: radial-gradient(circle at top right, #fefefe, var(--bg));
-      color: #111; margin: 0; padding: 0;
-      display: flex; flex-direction: column; align-items: center; min-height: 100vh;
+      font-family: 'Georgia', 'Times New Roman', serif;
+      background: var(--page-bg);
+      color: var(--ink);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      background-image: radial-gradient(rgba(255,255,255,0.3) 1px, transparent 1px);
+      background-size: 40px 40px;
     }
-    header { text-align: center; margin-top: 60px; padding: 0 16px; }
-    h1 { font-size: 2.2rem; margin-bottom: 8px; }
-    p.subtitle { font-size: 1.1rem; color: var(--muted); margin-bottom: 40px; }
+
+    header {
+      text-align: center;
+      margin-top: 60px;
+      padding: 0 16px;
+    }
+
+    h1 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 2.3rem;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      color: var(--ink);
+    }
+
+    p.subtitle {
+      font-size: 1.1rem;
+      color: var(--muted);
+      margin-bottom: 40px;
+    }
+
     main {
-      background: var(--card); box-shadow: 0 4px 12px rgba(0,0,0,.06);
-      border-radius: 16px; padding: 28px; width: 92%; max-width: 640px; transition: transform .3s;
+      background: var(--card);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px;
+      width: 92%;
+      max-width: 640px;
+      transition: transform 0.3s;
     }
+
     main:hover { transform: translateY(-2px); }
-    .controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+
+    .controls {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
     input[type="file"] { display: none; }
+
     label.upload-btn {
-      background: #111; color:#fff; padding:10px 16px; border-radius:10px; cursor:pointer; font-size:.95rem;
+      background: var(--accent);
+      color: #fff;
+      padding: 10px 16px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: .95rem;
+      font-family: 'Inter', sans-serif;
+      letter-spacing: 0.3px;
     }
+
+    label.upload-btn:hover { background: var(--accentH); }
+
     button {
-      padding:10px 16px; border-radius:10px; border: none; background: var(--brand); color:#fff; font-size:.95rem; cursor:pointer;
+      padding: 10px 16px;
+      border-radius: 10px;
+      border: none;
+      background: var(--accent);
+      color: #fff;
+      font-size: .95rem;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      letter-spacing: 0.3px;
     }
-    button:hover { background: var(--brandH); }
+
+    button:hover { background: var(--accentH); }
+
     .preview {
-      margin-top: 16px; border:1px solid var(--border); border-radius:12px; padding:12px; background:#fafafa;
-      display:flex; gap:14px; align-items:flex-start;
+      margin-top: 16px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+      background: #fbf9ef;
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
     }
+
     .preview img {
-      max-width: 180px; max-height: 180px; border-radius:10px; object-fit:cover; background:#ddd;
+      max-width: 180px;
+      max-height: 180px;
+      border-radius: 10px;
+      object-fit: cover;
+      background: #ddd;
     }
-    .preview .meta { color: var(--muted); font-size:.9rem; line-height:1.35; }
+
+    .preview .meta {
+      color: var(--muted);
+      font-size: .9rem;
+      line-height: 1.35;
+      font-family: 'Inter', sans-serif;
+    }
+
     #out {
-      white-space: pre-wrap; text-align:left; margin-top: 16px; background:#fafafa;
-      border-radius: 12px; padding: 18px; min-height: 160px; border:1px solid var(--border);
+      white-space: pre-wrap;
+      text-align: left;
+      margin-top: 16px;
+      background: #fcfaef;
+      border-radius: 12px;
+      padding: 18px;
+      min-height: 160px;
+      border: 1px solid var(--border);
+      box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.04);
+      line-height: 1.55;
+      font-family: 'Georgia', serif;
+      font-size: 1rem;
     }
+
     .loading { animation: pulse 1.5s infinite; }
-    @keyframes pulse { 0%{opacity:.5} 50%{opacity:1} 100%{opacity:.5} }
-    footer { margin-top:auto; padding: 26px 0 40px; text-align:center; font-size:.9rem; color: var(--muted); }
+    @keyframes pulse { 0% {opacity:.5} 50% {opacity:1} 100% {opacity:.5} }
+
+    footer {
+      margin-top: auto;
+      padding: 26px 0 40px;
+      text-align: center;
+      font-size: .9rem;
+      color: var(--muted);
+      font-family: 'Inter', sans-serif;
+    }
   </style>
 </head>
 
@@ -85,25 +192,23 @@
     const meta = document.getElementById("meta");
     const out = document.getElementById("out");
 
-    function show(msg, loading=false) { out.textContent = msg; out.className = loading ? "loading" : ""; }
+    function show(msg, loading=false) {
+      out.textContent = msg;
+      out.className = loading ? "loading" : "";
+    }
 
-    // ---- Image preview handling ----
     let lastURL = null;
     fileInput.addEventListener("change", () => {
       const f = fileInput.files && fileInput.files[0];
       if (!f) { preview.style.display = "none"; return; }
-
-      // Clean up prior object URL to avoid leaks
       if (lastURL) URL.revokeObjectURL(lastURL);
       lastURL = URL.createObjectURL(f);
-
       thumb.src = lastURL;
       meta.textContent = `${f.name}\n${f.type || "unknown"} • ${(f.size/1024/1024).toFixed(2)} MB`;
       preview.style.display = "flex";
       show("Ready — click Make Story.");
     });
 
-    // ---- Main flow ----
     async function requestUploadURL(f) {
       const res = await fetch(api + "/upload-url", {
         method: "POST",
@@ -130,7 +235,6 @@
       return data.story;
     }
 
-    // Expose globally for the button inline handler
     window.main = async function () {
       try {
         const f = fileInput.files && fileInput.files[0];

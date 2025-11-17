@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>StoryLens – Turn Images Into Stories</title>
-  <link rel="icon" href="/public/favicon.ico">
+  <link rel="icon" href="/public/storylens.png" type="image/png">
   <style>
     :root { --card:#fff; --muted:#666; --border:#e9e9ef; --bg:#f6f6f9; --brand:#007bff; --brandH:#005fc2; }
     * { box-sizing: border-box; }
@@ -52,7 +52,7 @@
 <body>
   <header>
     <h1>StoryLens</h1>
-    <p class="subtitle">Transform any image into a vivid short story powered by AI.</p>
+    <p class="subtitle">Transform any image into a vivid short story.</p>
   </header>
 
   <main>
@@ -72,7 +72,7 @@
   </main>
 
   <footer>
-    © <span id="year"></span> StoryLens.art — Crafted with imagination and Claude
+    © <span id="year"></span> StoryLens.art — Crafted with imagination
   </footer>
 
   <script>
@@ -142,7 +142,7 @@
         show("Uploading image to cloud…", true);
         await uploadToS3(up.put_url, f);
 
-        show("Creating story with Claude…", true);
+        show("Creating story with your image…", true);
         const story = await generateStory(up.key);
 
         show(story);

@@ -1,109 +1,151 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
-  <link rel="icon" href="/public/storylens.png" type="image/png">
-  <meta charset="utf-8">
-  <title>Image → Story Generator</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>StoryLens – Turn Images Into Stories</title>
+  <link rel="icon" href="/public/favicon.ico">
   <style>
-    /* 📖 Paperback novel feel */
+    :root { --card:#fff; --muted:#666; --border:#e9e9ef; --bg:#f6f6f9; --brand:#007bff; --brandH:#005fc2; }
+    * { box-sizing: border-box; }
     body {
-      font-family: Georgia, 'Times New Roman', serif;
-      max-width: 720px;
-      margin: 40px auto;
-      padding: 0 16px;
-      background-color: #fdf6e3; /* light cream / paper tone */
-      color: #2b2b2b;            /* soft dark text for readability */
-      line-height: 1.6;
+      font-family: 'Inter', system-ui, -apple-system, Roboto, Arial, sans-serif;
+      background: radial-gradient(circle at top right, #fefefe, var(--bg));
+      color: #111; margin: 0; padding: 0;
+      display: flex; flex-direction: column; align-items: center; min-height: 100vh;
     }
-
-    h1 {
-      font-size: 24px;
-      margin-bottom: 16px;
-      text-align: center;
-      color: #3a2e1f; /* slightly warmer tone for heading */
+    header { text-align: center; margin-top: 60px; padding: 0 16px; }
+    h1 { font-size: 2.2rem; margin-bottom: 8px; }
+    p.subtitle { font-size: 1.1rem; color: var(--muted); margin-bottom: 40px; }
+    main {
+      background: var(--card); box-shadow: 0 4px 12px rgba(0,0,0,.06);
+      border-radius: 16px; padding: 28px; width: 92%; max-width: 640px; transition: transform .3s;
     }
-
-    #out {
-      white-space: pre-wrap;
-      border: 1px solid #d6c7a1;
-      padding: 14px;
-      border-radius: 8px;
-      min-height: 140px;
-      margin-top: 16px;
-      background-color: #fffaf0; /* even lighter “page” color */
-      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+    main:hover { transform: translateY(-2px); }
+    .controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    input[type="file"] { display: none; }
+    label.upload-btn {
+      background: #111; color:#fff; padding:10px 16px; border-radius:10px; cursor:pointer; font-size:.95rem;
     }
-
-    input[type="file"] {
-      margin-right: 8px;
-    }
-
     button {
-      padding: 8px 16px;
-      border-radius: 8px;
-      border: 1px solid #cbbf9f;
-      background: #f5e6c8;
-      color: #2b2b2b;
-      cursor: pointer;
-      font-weight: 500;
-      transition: background 0.2s, box-shadow 0.2s;
+      padding:10px 16px; border-radius:10px; border: none; background: var(--brand); color:#fff; font-size:.95rem; cursor:pointer;
     }
-
-    button:hover {
-      background: #f0dcae;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    button:hover { background: var(--brandH); }
+    .preview {
+      margin-top: 16px; border:1px solid var(--border); border-radius:12px; padding:12px; background:#fafafa;
+      display:flex; gap:14px; align-items:flex-start;
     }
+    .preview img {
+      max-width: 180px; max-height: 180px; border-radius:10px; object-fit:cover; background:#ddd;
+    }
+    .preview .meta { color: var(--muted); font-size:.9rem; line-height:1.35; }
+    #out {
+      white-space: pre-wrap; text-align:left; margin-top: 16px; background:#fafafa;
+      border-radius: 12px; padding: 18px; min-height: 160px; border:1px solid var(--border);
+    }
+    .loading { animation: pulse 1.5s infinite; }
+    @keyframes pulse { 0%{opacity:.5} 50%{opacity:1} 100%{opacity:.5} }
+    footer { margin-top:auto; padding: 26px 0 40px; text-align:center; font-size:.9rem; color: var(--muted); }
   </style>
 </head>
-<body>
-  <h1>Welcome to StoryLens <br>An Image → Story Generator</h1>
 
-  <input type="file" id="file" accept="image/*">
-  <button id="go" onclick="main()">Make Story</button>
-  <div id="out">To begin, pick an image and click “Make Story”.</div>
+<body>
+  <header>
+    <h1>StoryLens</h1>
+    <p class="subtitle">Transform any image into a vivid short story powered by AI.</p>
+  </header>
+
+  <main>
+    <div class="controls">
+      <input type="file" id="file" accept="image/*">
+      <label for="file" class="upload-btn">Choose Image</label>
+      <button id="go" onclick="main()">Make Story</button>
+    </div>
+
+    <!-- Image preview block -->
+    <div id="preview" class="preview" style="display:none">
+      <img id="thumb" alt="Selected image preview" />
+      <div class="meta" id="meta"></div>
+    </div>
+
+    <div id="out">Upload an image and click <strong>Make Story</strong> to begin.</div>
+  </main>
+
+  <footer>
+    © <span id="year"></span> StoryLens.art — Crafted with imagination and Claude
+  </footer>
 
   <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
     const api = window.location.origin;
 
-    function show(msg) {
-      const out = document.getElementById("out");
-      if (out) out.textContent = msg;
+    const fileInput = document.getElementById("file");
+    const preview = document.getElementById("preview");
+    const thumb = document.getElementById("thumb");
+    const meta = document.getElementById("meta");
+    const out = document.getElementById("out");
+
+    function show(msg, loading=false) { out.textContent = msg; out.className = loading ? "loading" : ""; }
+
+    // ---- Image preview handling ----
+    let lastURL = null;
+    fileInput.addEventListener("change", () => {
+      const f = fileInput.files && fileInput.files[0];
+      if (!f) { preview.style.display = "none"; return; }
+
+      // Clean up prior object URL to avoid leaks
+      if (lastURL) URL.revokeObjectURL(lastURL);
+      lastURL = URL.createObjectURL(f);
+
+      thumb.src = lastURL;
+      meta.textContent = `${f.name}\n${f.type || "unknown"} • ${(f.size/1024/1024).toFixed(2)} MB`;
+      preview.style.display = "flex";
+      show("Ready — click Make Story.");
+    });
+
+    // ---- Main flow ----
+    async function requestUploadURL(f) {
+      const res = await fetch(api + "/upload-url", {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({ filename: f.name, content_type: f.type })
+      });
+      if (!res.ok) throw new Error(`upload-url ${res.status}: ${await res.text()}`);
+      const data = await res.json();
+      if (!data.put_url || !data.key) throw new Error("upload-url missing fields");
+      return data;
     }
 
+    async function uploadToS3(putURL, file) {
+      const r = await fetch(putURL, { method:"PUT", body:file, headers: { "Content-Type": file.type } });
+      if (!r.ok) throw new Error(`S3 PUT ${r.status}: ${await r.text()}`);
+    }
+
+    async function generateStory(key) {
+      const r = await fetch(api + "/generate?key=" + encodeURIComponent(key));
+      const t = await r.text();
+      if (!r.ok) throw new Error(`generate ${r.status}: ${t}`);
+      const data = JSON.parse(t);
+      if (!data.story) throw new Error("No story in response.");
+      return data.story;
+    }
+
+    // Expose globally for the button inline handler
     window.main = async function () {
       try {
-        const fileInput = document.getElementById("file");
-        const f = fileInput && fileInput.files && fileInput.files[0];
-        if (!f) { alert("Pick an image first."); return; }
+        const f = fileInput.files && fileInput.files[0];
+        if (!f) { alert("Please choose an image first."); return; }
 
-        show("Requesting upload URL...");
-        const upRes = await fetch(api + "/upload-url", {
-          method: "POST",
-          headers: {"Content-Type":"application/json"},
-          body: JSON.stringify({ filename: f.name, content_type: f.type })
-        });
-        const upText = await upRes.text();
-        if (!upRes.ok) throw new Error(`upload-url ${upRes.status}: ${upText}`);
-        let up;
-        try { up = JSON.parse(upText); } catch { throw new Error("upload-url non-JSON: " + upText); }
-        if (!up.put_url || !up.key) throw new Error("upload-url missing put_url/key");
+        show("Requesting upload URL…", true);
+        const up = await requestUploadURL(f);
 
-        show("Uploading to S3...");
-        const putRes = await fetch(up.put_url, { method: "PUT", body: f, headers: { "Content-Type": f.type } });
-        if (!putRes.ok) {
-          const t = await putRes.text();
-          throw new Error(`S3 PUT ${putRes.status}: ${t}`);
-        }
+        show("Uploading image to cloud…", true);
+        await uploadToS3(up.put_url, f);
 
-        show("Generating story with your image. Please wait 20–30 seconds...");
-        const genRes = await fetch(api + "/generate?key=" + encodeURIComponent(up.key));
-        const genText = await genRes.text();
-        if (!genRes.ok) throw new Error(`generate ${genRes.status}: ${genText}`);
-        let data;
-        try { data = JSON.parse(genText); } catch { throw new Error("generate non-JSON: " + genText); }
-        if (!data.story) throw new Error("No story in response.");
-        show(data.story);
+        show("Creating story with Claude…", true);
+        const story = await generateStory(up.key);
+
+        show(story);
       } catch (e) {
         console.error(e);
         show("Error: " + (e?.message || e));

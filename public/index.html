@@ -49,16 +49,26 @@
       transition: background-color .25s ease, color .25s ease;
     }
 
-    header {
-      text-align: center;
-      margin-top: 48px;
-      padding: 0 16px;
+    /* Centered page wrapper */
+    .page {
+      flex: 1;
       width: 100%;
-      max-width: 920px;
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 40px 16px 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    header {
+      width: 100%;
       display: grid;
       grid-template-columns: 1fr auto 1fr;
       align-items: center;
       gap: 8px;
+      text-align: center;
+      margin-bottom: 24px;
     }
 
     .header-spacer { height: 1px; }
@@ -74,7 +84,7 @@
       grid-column: 1 / -1;
       font-size: 1.1rem;
       color: var(--muted);
-      margin: 8px 0 28px;
+      margin: 8px 0 0;
       text-align: center;
     }
 
@@ -112,13 +122,12 @@
 
     /* ---------- MAIN CONTENT ---------- */
     main {
-      flex: 1;
       background: var(--card);
       box-shadow: 0 4px 10px rgba(0,0,0,0.05);
       border: 1px solid var(--border);
       border-radius: 16px;
       padding: 28px;
-      width: 92%;
+      width: 100%;
       max-width: 700px;
       margin-bottom: 30px;
       transition: background-color .25s ease, border-color .25s ease;
@@ -147,7 +156,9 @@
       cursor: pointer;
       font-size: .95rem;
     }
-    label.upload-btn:hover, button:hover {
+
+    label.upload-btn:hover,
+    button:hover {
       background: var(--accentH);
     }
 
@@ -156,8 +167,16 @@
       color: var(--ink);
     }
 
-    .select-wrap { display: flex; align-items: center; gap: 8px; }
-    .select-label { color: var(--muted); font-size: .9rem; }
+    .select-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .select-label {
+      color: var(--muted);
+      font-size: .9rem;
+    }
 
     .preview {
       margin-top: 16px;
@@ -193,75 +212,77 @@
 </head>
 
 <body>
-  <header>
-    <div class="header-spacer"></div>
+  <div class="page">
+    <header>
+      <div class="header-spacer"></div>
 
-    <div><h1>StoryLens</h1></div>
+      <div><h1>StoryLens</h1></div>
 
-    <div class="toggle-wrap" title="Toggle night mode">
-      <span id="emoji">🌞</span>
-      <div class="toggle-btn" id="themeToggle">
-        <div class="toggle-knob"></div>
-      </div>
-    </div>
-
-    <p class="subtitle">Transform any image into a vivid short story.</p>
-  </header>
-
-  <main>
-    <div class="controls">
-      <!-- File Upload -->
-      <div>
-        <input type="file" id="file" accept="image/*">
-        <label for="file" class="upload-btn">Choose Image</label>
+      <div class="toggle-wrap" title="Toggle night mode">
+        <span id="emoji">🌞</span>
+        <div class="toggle-btn" id="themeToggle">
+          <div class="toggle-knob"></div>
+        </div>
       </div>
 
-      <!-- Style Selector -->
-      <div class="select-wrap">
-        <span class="select-label">Style:</span>
-        <select id="styleSel">
-          <option>Whimsical</option>
-          <option>Noir</option>
-          <option>Epic</option>
-          <option>Cozy</option>
-          <option>Sci-Fi</option>
-          <option>Fantasy</option>
-          <option>Action</option>
-          <option>Romance</option>
-          <option>Mystery</option>
-          <option>Historical</option>
-          <option>Magical Realism</option>
-        </select>
+      <p class="subtitle">Transform any image into a vivid short story.</p>
+    </header>
+
+    <main>
+      <div class="controls">
+        <!-- File Upload -->
+        <div>
+          <input type="file" id="file" accept="image/*">
+          <label for="file" class="upload-btn">Choose Image</label>
+        </div>
+
+        <!-- Style Selector -->
+        <div class="select-wrap">
+          <span class="select-label">Style:</span>
+          <select id="styleSel">
+            <option>Whimsical</option>
+            <option>Noir</option>
+            <option>Epic</option>
+            <option>Cozy</option>
+            <option>Sci-Fi</option>
+            <option>Fantasy</option>
+            <option>Action</option>
+            <option>Romance</option>
+            <option>Mystery</option>
+            <option>Historical</option>
+            <option>Magical Realism</option>
+          </select>
+        </div>
+
+        <!-- Length Selector -->
+        <div class="select-wrap">
+          <span class="select-label">Length:</span>
+          <select id="lenSel">
+            <option value="300-500">Short</option>
+            <option value="600-1000" selected>Medium</option>
+            <option value="1400-2000">Long</option>
+          </select>
+        </div>
+
+        <!-- Generate Button -->
+        <button onclick="main()">Make Story</button>
       </div>
 
-      <!-- Length Selector -->
-      <div class="select-wrap">
-        <span class="select-label">Length:</span>
-        <select id="lenSel">
-          <option value="300-500">Short</option>
-          <option value="600-1000" selected>Medium</option>
-          <option value="1400-2000">Long</option>
-        </select>
+      <!-- Image Preview -->
+      <div id="preview" class="preview" style="display:none">
+        <img id="thumb" alt="Preview">
+        <div class="meta" id="meta"></div>
       </div>
 
-      <!-- Generate Button -->
-      <button onclick="main()">Make Story</button>
-    </div>
-
-    <!-- Image Preview -->
-    <div id="preview" class="preview" style="display:none">
-      <img id="thumb" alt="Preview">
-      <div class="meta" id="meta"></div>
-    </div>
-
-    <div id="out">Upload an image, choose your style and length, then click <strong>Make Story</strong>.</div>
-  </main>
+      <div id="out">
+        Upload an image, choose your style and length, then click <strong>Make Story</strong>.
+      </div>
+    </main>
+  </div>
 
   <footer>© 2025 StoryLens.art — Crafted with imagination.</footer>
 
   <script>
-    document.getElementById("year");
-
     const body = document.body;
     const toggle = document.getElementById("themeToggle");
     const emoji = document.getElementById("emoji");
@@ -288,12 +309,12 @@
 
     const api = window.location.origin;
     const fileInput = document.getElementById("file");
-    const styleSel = document.getElementById("styleSel");
-    const lenSel = document.getElementById("lenSel");
-    const preview = document.getElementById("preview");
-    const thumb = document.getElementById("thumb");
-    const meta = document.getElementById("meta");
-    const out = document.getElementById("out");
+    const styleSel  = document.getElementById("styleSel");
+    const lenSel    = document.getElementById("lenSel");
+    const preview   = document.getElementById("preview");
+    const thumb     = document.getElementById("thumb");
+    const meta      = document.getElementById("meta");
+    const out       = document.getElementById("out");
 
     const STYLE_MAP = {
       "Whimsical": "whimsical, playful, light magical touches, gentle humor",
@@ -321,7 +342,7 @@
       lastURL = URL.createObjectURL(f);
 
       thumb.src = lastURL;
-      meta.textContent = `${f.name}\n${f.type} • ${(f.size/1024/1024).toFixed(2)} MB`;
+      meta.textContent = `${f.name}\n${f.type || ""} • ${(f.size/1024/1024).toFixed(2)} MB`;
       preview.style.display = "flex";
 
       show("Ready — click Make Story.");

@@ -186,14 +186,14 @@
       padding: 12px;
       background: color-mix(in oklab, var(--card), black 2%);
       display: flex;
-      flex-direction: column;      /* image on top, meta below */
+      flex-direction: column;
       align-items: center;
       gap: 8px;
     }
 
     .preview img {
       display: block;
-      max-width: 100%;            /* never overflow card */
+      max-width: 100%;
       height: auto;
       border-radius: 10px;
     }
@@ -203,10 +203,11 @@
       color: var(--muted);
       font-size: .9rem;
       white-space: pre-line;
-      word-break: break-word;     /* long filenames stay inside */
+      word-break: break-word;
       font-family: 'Inter', sans-serif;
     }
 
+    /* ---------- Story Output ---------- */
     #out {
       margin-top: 16px;
       background: color-mix(in oklab, var(--card), white 4%);
@@ -219,6 +220,18 @@
       font-family: 'Georgia', serif;
     }
 
+    /* ---------- Flashing Loading Animation ---------- */
+    .loading {
+      animation: pulse 1.4s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%   { opacity: 0.45; }
+      50%  { opacity: 1; }
+      100% { opacity: 0.45; }
+    }
+
+    /* ---------- Footer ---------- */
     footer {
       text-align: center;
       padding: 20px 0 40px;
@@ -348,7 +361,10 @@
       "Magical Realism": "magical realism, subtle surrealism, poetic"
     };
 
-    function show(msg){ out.textContent = msg; }
+    function show(msg, loading=false){
+      out.textContent = msg;
+      out.className = loading ? "loading" : "";
+    }
 
     let lastURL = null;
 
@@ -383,7 +399,7 @@
         const style = STYLE_MAP[styleSel.value];
         const length_hint = lenSel.value;
 
-        show("Requesting upload URL…");
+        show("Requesting upload URL…", true);
         const up = await requestUploadURL(f);
 
         await fetch(up.put_url, {
@@ -392,7 +408,7 @@
           headers: { "Content-Type": f.type }
         });
 
-        show("Creating your story…");
+        show("Creating your story…", true);
 
         const r = await fetch(
           api + "/generate?key=" + encodeURIComponent(up.key)
@@ -401,10 +417,10 @@
         );
 
         const data = await r.json();
-        show(data.story);
+        show(data.story, false);
 
       } catch(e) {
-        show("Error: " + e.message);
+        show("Error: " + e.message, false);
       }
     }
   </script>

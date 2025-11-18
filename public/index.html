@@ -8,25 +8,25 @@
   <style>
     /* ---------- Base (Day / Paperback) Palette ---------- */
     :root {
-      --page-bg: #f8f5e7;        /* soft paper background */
-      --card: #fdfaf2;           /* light cream card */
-      --ink: #2c2b27;            /* book ink text */
-      --muted: #6b6456;          /* aged gray-brown */
-      --border: #e4dfd2;         /* parchment edge tone */
-      --accent: #6e5334;         /* warm brown accent */
-      --accentH: #8a6b47;        /* hover accent */
+      --page-bg: #f8f5e7;        
+      --card: #fdfaf2;           
+      --ink: #2c2b27;            
+      --muted: #6b6456;          
+      --border: #e4dfd2;         
+      --accent: #6e5334;         
+      --accentH: #8a6b47;        
       --paper-grain: radial-gradient(rgba(255,255,255,0.3) 1px, transparent 1px);
     }
 
     /* ---------- Night / Sepia Mode Palette ---------- */
     body[data-theme="night"] {
-      --page-bg: #1f1a14;        /* deep coffee brown */
-      --card: #2a231c;           /* dark parchment */
-      --ink: #efe7d7;            /* warm ink on dark */
-      --muted: #c7bba7;          /* mellow sepia text */
-      --border: #3a3128;         /* subtle border */
-      --accent: #cda677;         /* warm brass accent */
-      --accentH: #e3be8d;        /* brighter hover */
+      --page-bg: #1f1a14;
+      --card: #2a231c;
+      --ink: #efe7d7;
+      --muted: #c7bba7;
+      --border: #3a3128;
+      --accent: #cda677;
+      --accentH: #e3be8d;
       --paper-grain: radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1px);
     }
 
@@ -36,12 +36,8 @@
       font-family: 'Georgia', 'Times New Roman', serif;
       background: var(--page-bg);
       color: var(--ink);
-      margin: 0;
-      padding: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      min-height: 100vh;
+      margin: 0; padding: 0;
+      display: flex; flex-direction: column; align-items: center; min-height: 100vh;
       background-image: var(--paper-grain);
       background-size: 40px 40px;
       transition: background-color .25s ease, color .25s ease;
@@ -58,8 +54,6 @@
       align-items: center;
       gap: 8px;
     }
-
-    /* Center the title; toggle sits right */
     .header-spacer { height: 1px; }
     h1 {
       font-family: 'Playfair Display', Georgia, serif;
@@ -82,7 +76,7 @@
       align-items: center;
       gap: 8px;
       color: var(--muted);
-      font-family: 'Inter', system-ui, -apple-system, Roboto, Arial, sans-serif;
+      font-family: 'Inter', system-ui, sans-serif;
     }
     .toggle-btn {
       position: relative;
@@ -95,48 +89,69 @@
       transition: background .2s ease, border-color .2s ease;
     }
     .toggle-knob {
-      position: absolute; top: 2px; left: 2px;
-      width: 24px; height: 24px; border-radius: 50%;
+      position: absolute;
+      top: 2px; left: 2px;
+      width: 24px; height: 24px;
+      border-radius: 50%;
       background: var(--accent);
       transition: transform .25s ease, background .25s ease;
     }
     body[data-theme="night"] .toggle-knob {
       transform: translateX(20px);
-      background: var(--accent);
     }
-    .toggle-emoji { user-select: none; font-size: 18px; }
 
     main {
       background: var(--card);
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
       border: 1px solid var(--border);
       border-radius: 16px;
       padding: 28px;
       width: 92%;
-      max-width: 640px;
-      transition: transform 0.3s, background-color .25s ease, border-color .25s ease;
+      max-width: 700px;
+      transition: transform .3s, background-color .25s ease, border-color .25s ease;
     }
     main:hover { transform: translateY(-2px); }
 
     .controls {
-      display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
-      font-family: 'Inter', system-ui, -apple-system, Roboto, Arial, sans-serif;
+      display: grid;
+      grid-template-columns: 1fr 1fr auto;
+      gap: 10px;
+      align-items: center;
+      font-family: 'Inter', sans-serif;
+    }
+    @media (max-width: 640px) {
+      .controls { grid-template-columns: 1fr; }
     }
 
     input[type="file"] { display: none; }
 
-    label.upload-btn, button {
-      padding: 10px 16px;
+    label.upload-btn, button, select {
+      padding: 10px 12px;
       border-radius: 10px;
       border: 1px solid var(--border);
       background: var(--accent);
       color: #fff;
       font-size: .95rem;
+      letter-spacing: 0.2px;
       cursor: pointer;
-      letter-spacing: 0.3px;
-      transition: background-color .2s ease, border-color .2s ease;
+      transition: background-color .2s ease;
     }
-    label.upload-btn:hover, button:hover { background: var(--accentH); }
+    label.upload-btn:hover, button:hover {
+      background: var(--accentH);
+    }
+
+    select {
+      background: color-mix(in oklab, var(--card), black 8%);
+      color: var(--ink);
+      border: 1px solid var(--border);
+    }
+    body[data-theme="night"] select {
+      background: color-mix(in oklab, var(--card), white 6%);
+      color: var(--ink);
+    }
+
+    .select-wrap { display:flex; align-items:center; gap:8px; }
+    .select-label { color: var(--muted); font-size: .9rem; }
 
     .preview {
       margin-top: 16px;
@@ -147,20 +162,6 @@
       display: flex;
       gap: 14px;
       align-items: flex-start;
-      transition: background-color .25s ease, border-color .25s ease;
-    }
-
-    .preview img {
-      max-width: 180px; max-height: 180px;
-      border-radius: 10px; object-fit: cover; background: #ddd;
-    }
-
-    .preview .meta {
-      color: var(--muted);
-      font-size: .9rem;
-      line-height: 1.35;
-      font-family: 'Inter', system-ui, -apple-system, Roboto, Arial, sans-serif;
-      white-space: pre-line;
     }
 
     #out {
@@ -172,23 +173,10 @@
       padding: 18px;
       min-height: 160px;
       border: 1px solid var(--border);
-      box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.04);
+      box-shadow: inset 0 0 8px rgba(0,0,0,0.04);
       line-height: 1.55;
       font-family: 'Georgia', serif;
       font-size: 1rem;
-      transition: background-color .25s ease, border-color .25s ease;
-    }
-
-    .loading { animation: pulse 1.5s infinite; }
-    @keyframes pulse { 0% {opacity:.5} 50% {opacity:1} 100% {opacity:.5} }
-
-    footer {
-      margin-top: auto;
-      padding: 26px 0 40px;
-      text-align: center;
-      font-size: .9rem;
-      color: var(--muted);
-      font-family: 'Inter', system-ui, -apple-system, Roboto, Arial, sans-serif;
     }
   </style>
 </head>
@@ -197,15 +185,11 @@
   <header>
     <div class="header-spacer"></div>
 
-    <div>
-      <h1>StoryLens</h1>
-    </div>
+    <div><h1>StoryLens</h1></div>
 
     <div class="toggle-wrap" title="Toggle night reading mode">
-      <span class="toggle-emoji" id="emoji">🌞</span>
-      <div class="toggle-btn" id="themeToggle" role="switch" aria-checked="false" tabindex="0">
-        <div class="toggle-knob"></div>
-      </div>
+      <span id="emoji">🌞</span>
+      <div class="toggle-btn" id="themeToggle"><div class="toggle-knob"></div></div>
     </div>
 
     <p class="subtitle">Transform any image into a vivid short story.</p>
@@ -213,139 +197,168 @@
 
   <main>
     <div class="controls">
-      <input type="file" id="file" accept="image/*">
-      <label for="file" class="upload-btn">Choose Image</label>
-      <button id="go" onclick="main()">Make Story</button>
+
+      <!-- File Upload -->
+      <div>
+        <input type="file" id="file" accept="image/*">
+        <label for="file" class="upload-btn">Choose Image</label>
+      </div>
+
+      <!-- Style -->
+      <div class="select-wrap">
+        <span class="select-label">Style:</span>
+        <select id="styleSel">
+          <option>Whimsical</option>
+          <option>Noir</option>
+          <option>Epic</option>
+          <option>Cozy</option>
+          <option selected>Sci-Fi</option>
+          <option>Fantasy</option>
+          <option>Action</option>
+          <option>Romance</option>
+          <option>Mystery</option>
+          <option>Historical</option>
+          <option>Magical Realism</option>
+          <option>Horror</option>
+        </select>
+      </div>
+
+      <!-- Length -->
+      <div class="select-wrap">
+        <span class="select-label">Length:</span>
+        <select id="lenSel">
+          <option value="300-500">Short</option>
+          <option value="600-1000" selected>Medium</option>
+          <option value="1400-2000">Long</option>
+        </select>
+      </div>
+
+      <!-- Button -->
+      <button onclick="main()">Make Story</button>
     </div>
 
-    <!-- Image preview block -->
+    <!-- Preview -->
     <div id="preview" class="preview" style="display:none">
-      <img id="thumb" alt="Selected image preview" />
+      <img id="thumb" />
       <div class="meta" id="meta"></div>
     </div>
 
-    <div id="out">Upload an image and click <strong>Make Story</strong> to begin.</div>
+    <div id="out">Upload an image, pick a style and length, then click <strong>Make Story</strong>.</div>
   </main>
 
-  <footer>
-    © <span id="year"></span> StoryLens.art — Crafted with imagination
-  </footer>
+  <footer>© <span id="year"></span> StoryLens.art — Crafted with imagination</footer>
 
   <script>
-    // ---------- Utilities ----------
+    // Year
     document.getElementById("year").textContent = new Date().getFullYear();
-    const api = window.location.origin;
 
-    // Theme state
+    // Night Mode
     const body = document.body;
-    const toggle = document.getElementById('themeToggle');
-    const emoji = document.getElementById('emoji');
+    const toggle = document.getElementById("themeToggle");
+    const emoji  = document.getElementById("emoji");
 
-    // Init from saved pref or system
-    (function initTheme(){
-      const saved = localStorage.getItem('storylens-theme');
-      if (saved === 'night' || (!saved && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-        setTheme('night');
+    function setTheme(mode){
+      if(mode==="night"){
+        body.setAttribute("data-theme","night");
+        emoji.textContent="🌙";
+        localStorage.setItem("storylens-theme","night");
       } else {
-        setTheme('day');
-      }
-    })();
-
-    function setTheme(mode) {
-      if (mode === 'night') {
-        body.setAttribute('data-theme','night');
-        toggle.setAttribute('aria-checked','true');
-        emoji.textContent = '🌙';
-        localStorage.setItem('storylens-theme','night');
-      } else {
-        body.removeAttribute('data-theme');
-        toggle.setAttribute('aria-checked','false');
-        emoji.textContent = '🌞';
-        localStorage.setItem('storylens-theme','day');
+        body.removeAttribute("data-theme");
+        emoji.textContent="🌞";
+        localStorage.setItem("storylens-theme","day");
       }
     }
 
-    function toggleTheme() {
-      const isNight = body.getAttribute('data-theme') === 'night';
-      setTheme(isNight ? 'day' : 'night');
-    }
+    const saved = localStorage.getItem("storylens-theme");
+    if(saved==="night") setTheme("night");
 
-    toggle.addEventListener('click', toggleTheme);
-    toggle.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleTheme(); }
-    });
+    toggle.onclick = ()=> {
+      const isNight = body.getAttribute("data-theme")==="night";
+      setTheme(isNight?"day":"night");
+    };
 
-    // ---------- App Logic ----------
+    // App Logic
+    const api = window.location.origin;
     const fileInput = document.getElementById("file");
-    const preview = document.getElementById("preview");
-    const thumb = document.getElementById("thumb");
-    const meta = document.getElementById("meta");
-    const out = document.getElementById("out");
+    const styleSel  = document.getElementById("styleSel");
+    const lenSel    = document.getElementById("lenSel");
+    const preview   = document.getElementById("preview");
+    const thumb     = document.getElementById("thumb");
+    const meta      = document.getElementById("meta");
+    const out       = document.getElementById("out");
 
-    function show(msg, loading=false) {
+    const STYLE_MAP = {
+      "Whimsical": "whimsical, playful, light magical touches, gentle humor",
+      "Noir": "noir, moody, terse sentences, moral ambiguity, smoky atmosphere",
+      "Epic": "epic, sweeping, elevated diction, fate and grandeur",
+      "Cozy": "cozy, tender, comforting, small-town warmth, gentle pacing",
+      "Sci-Fi": "science fiction, speculative, sense of wonder, grounded tech detail",
+      "Fantasy": "fantasy, mythic, lyrical, folklore textures, wonder and myth",
+      "Action": "fast-paced, kinetic, cinematic, high stakes",
+      "Romance": "romantic, intimate, yearning, soft tenderness",
+      "Mystery": "mystery, investigative, clue-driven, escalating tension",
+      "Historical": "historical, era-accurate detail, grounded tone",
+      "Magical Realism": "magical realism, subtle surrealism, poetic texture"
+    };
+
+    function show(msg, loading=false){
       out.textContent = msg;
-      out.className = loading ? "loading" : "";
     }
 
     // Image preview
     let lastURL = null;
-    fileInput.addEventListener("change", () => {
-      const f = fileInput.files && fileInput.files[0];
-      if (!f) { preview.style.display = "none"; return; }
-      if (lastURL) URL.revokeObjectURL(lastURL);
+    fileInput.onchange = ()=>{
+      const f = fileInput.files[0];
+      if(!f){ preview.style.display="none"; return; }
+      if(lastURL) URL.revokeObjectURL(lastURL);
       lastURL = URL.createObjectURL(f);
       thumb.src = lastURL;
-      meta.textContent = `${f.name}\n${f.type || "unknown"} • ${(f.size/1024/1024).toFixed(2)} MB`;
-      preview.style.display = "flex";
+      meta.textContent = `${f.name}\n${f.type} • ${(f.size/1024/1024).toFixed(2)} MB`;
+      preview.style.display="flex";
       show("Ready — click Make Story.");
-    });
+    };
 
-    async function requestUploadURL(f) {
-      const res = await fetch(api + "/upload-url", {
-        method: "POST",
-        headers: {"Content-Type":"application/json"},
-        body: JSON.stringify({ filename: f.name, content_type: f.type })
+    async function requestUploadURL(f){
+      const r = await fetch(api+"/upload-url",{
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body:JSON.stringify({ filename:f.name, content_type:f.type })
       });
-      if (!res.ok) throw new Error(`upload-url ${res.status}: ${await res.text()}`);
-      const data = await res.json();
-      if (!data.put_url || !data.key) throw new Error("upload-url missing fields");
-      return data;
+      return r.json();
     }
 
-    async function uploadToS3(putURL, file) {
-      const r = await fetch(putURL, { method:"PUT", body:file, headers: { "Content-Type": file.type } });
-      if (!r.ok) throw new Error(`S3 PUT ${r.status}: ${await r.text()}`);
-    }
+    async function main(){
+      try{
+        const f = fileInput.files[0];
+        if(!f) return alert("Choose an image first.");
 
-    async function generateStory(key) {
-      const r = await fetch(api + "/generate?key=" + encodeURIComponent(key));
-      const t = await r.text();
-      if (!r.ok) throw new Error(`generate ${r.status}: ${t}`);
-      const data = JSON.parse(t);
-      if (!data.story) throw new Error("No story in response.");
-      return data.story;
-    }
+        const style = STYLE_MAP[styleSel.value];
+        const length_hint = lenSel.value;
 
-    window.main = async function () {
-      try {
-        const f = fileInput.files && fileInput.files[0];
-        if (!f) { alert("Please choose an image first."); return; }
-
-        show("Requesting upload URL…", true);
+        show("Requesting upload URL…",true);
         const up = await requestUploadURL(f);
 
-        show("Uploading image to cloud…", true);
-        await uploadToS3(up.put_url, f);
+        await fetch(up.put_url,{
+          method:"PUT",
+          body:f,
+          headers:{ "Content-Type":f.type }
+        });
 
-        show("Creating story with your image…", true);
-        const story = await generateStory(up.key);
+        show("Creating your story…",true);
 
-        show(story);
-      } catch (e) {
-        console.error(e);
-        show("Error: " + (e?.message || e));
+        const r = await fetch(
+          api+"/generate?key="+encodeURIComponent(up.key)
+          +"&style="+encodeURIComponent(style)
+          +"&length_hint="+encodeURIComponent(length_hint)
+        );
+
+        const data = await r.json();
+        show(data.story);
       }
-    };
+      catch(e){
+        show("Error: "+e.message);
+      }
+    }
   </script>
 </body>
 </html>

@@ -178,6 +178,7 @@
       font-size: .9rem;
     }
 
+    /* ---------- PREVIEW (fixed layout) ---------- */
     .preview {
       margin-top: 16px;
       border: 1px solid var(--border);
@@ -185,8 +186,25 @@
       padding: 12px;
       background: color-mix(in oklab, var(--card), black 2%);
       display: flex;
-      gap: 14px;
-      align-items: flex-start;
+      flex-direction: column;      /* image on top, meta below */
+      align-items: center;
+      gap: 8px;
+    }
+
+    .preview img {
+      display: block;
+      max-width: 100%;            /* never overflow card */
+      height: auto;
+      border-radius: 10px;
+    }
+
+    .preview .meta {
+      align-self: flex-start;
+      color: var(--muted);
+      font-size: .9rem;
+      white-space: pre-line;
+      word-break: break-word;     /* long filenames stay inside */
+      font-family: 'Inter', sans-serif;
     }
 
     #out {

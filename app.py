@@ -63,6 +63,8 @@ def generate_story(
     length_hint: str = Query("700-900 words", description="Rough target length"),
     audience: str = Query("general", description="Target audience"),
     temperature: float = Query(0.8, ge=0.0, le=1.0),
+    # NEW: optional hint from the user
+    hint: str = Query("", description="Optional story tweak, e.g. 'include a dragon and elves'"),
 ):
     if not BUCKET:
         raise HTTPException(500, "S3_BUCKET not configured")
@@ -78,9 +80,20 @@ def generate_story(
         "and subtle emotional arc over object listing. Show, don't tell."
     )
 
+    # If the user provided a hint, gently nudge Claude to use it
+    extra_hint = ""
+    if hint.strip():
+        extra_hint = (
+            "\n\nThe user has an additional preference for the narrative. "
+            "Subtly and naturally incorporate the following into the story without "
+            "breaking tone or coherence: "
+            f"\"{hint.strip()}\""
+        )
+
     user_text = (
         f"Write a {length_hint} story inspired by this image for a(n) {audience} audience.\n"
         f"Tone/style: {style}. Avoid bullet points or captions. Keep the narrative unified."
+        f"{extra_hint}"
     )
 
     try:

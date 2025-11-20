@@ -162,6 +162,20 @@
       background: var(--accentH);
     }
 
+    /* subtle secondary button look for copy */
+    .secondary-btn {
+      background: transparent;
+      color: var(--accent);
+      border-color: var(--accent);
+      font-size: .85rem;
+      padding: 8px 12px;
+    }
+
+    .secondary-btn:hover {
+      background: var(--accent);
+      color: #fff;
+    }
+
     select {
       background: color-mix(in oklab, var(--card), black 8%);
       color: var(--ink);
@@ -218,6 +232,13 @@
       line-height: 1.55;
       white-space: pre-wrap;
       font-family: 'Georgia', serif;
+    }
+
+    /* copy button container */
+    .copy-row {
+      margin-top: 8px;
+      display: flex;
+      justify-content: flex-end;
     }
 
     /* ---------- Flashing Loading Animation ---------- */
@@ -308,6 +329,12 @@
       <div id="out">
         Upload an image, choose your style and length, then click <strong>Make Story</strong>.
       </div>
+
+      <div class="copy-row">
+        <button id="copyBtn" type="button" class="secondary-btn" onclick="copyStory()">
+          Copy Story
+        </button>
+      </div>
     </main>
   </div>
 
@@ -346,6 +373,7 @@
     const thumb     = document.getElementById("thumb");
     const meta      = document.getElementById("meta");
     const out       = document.getElementById("out");
+    const copyBtn   = document.getElementById("copyBtn");
 
     const STYLE_MAP = {
       "Whimsical": "whimsical, playful, light magical touches, gentle humor",
@@ -421,6 +449,52 @@
 
       } catch(e) {
         show("Error: " + e.message, false);
+      }
+    }
+
+    // ---------- Copy Story to Clipboard ----------
+    function copyStory() {
+      const text = out.textContent.trim();
+
+      // Basic check so people don't copy helper/loading/error text
+      if (!text ||
+          text.startsWith("Upload an image") ||
+          text.startsWith("Ready —") ||
+          text.startsWith("Requesting upload URL") ||
+          text.startsWith("Creating your story…") ||
+          text.startsWith("Error:")) {
+        alert("There isn't a finished story to copy yet.");
+        return;
+      }
+
+      const labelDefault = "Copy Story";
+
+      function setLabel(msg) {
+        copyBtn.textContent = msg;
+        setTimeout(() => { copyBtn.textContent = labelDefault; }, 1500);
+      }
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text)
+          .then(() => setLabel("Copied!"))
+          .catch(() => {
+            setLabel("Copy failed");
+          });
+      } else {
+        // Fallback for older browsers
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        ta.style.position = "fixed";
+        ta.style.left = "-9999px";
+        document.body.appendChild(ta);
+        ta.select();
+        try {
+          document.execCommand("copy");
+          setLabel("Copied!");
+        } catch {
+          setLabel("Copy failed");
+        }
+        document.body.removeChild(ta);
       }
     }
   </script>

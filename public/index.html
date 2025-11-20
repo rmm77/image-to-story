@@ -192,6 +192,42 @@
       font-size: .9rem;
     }
 
+    /* ---------- Optional story tweak (hint) ---------- */
+    .hint-wrap {
+      margin-top: 14px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem;
+      color: var(--muted);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .hint-wrap label {
+      font-weight: 500;
+    }
+
+    #hint {
+      resize: vertical;
+      min-height: 48px;
+      max-height: 120px;
+      padding: 8px 10px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: color-mix(in oklab, var(--card), white 4%);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem;
+      color: var(--ink);
+    }
+
+    #hint::placeholder {
+      color: rgba(0,0,0,0.35);
+    }
+
+    body[data-theme="night"] #hint::placeholder {
+      color: rgba(255,255,255,0.45);
+    }
+
     /* ---------- PREVIEW (fixed layout) ---------- */
     .preview {
       margin-top: 16px;
@@ -320,6 +356,15 @@
         <button onclick="main()">Make Story</button>
       </div>
 
+      <!-- Optional story tweak (hint) -->
+      <div class="hint-wrap">
+        <label for="hint">Optional story tweak</label>
+        <textarea
+          id="hint"
+          placeholder='Add a detail you want woven in, e.g. "include a dragon and elves", "make it bittersweet", "give it a hopeful ending".'
+        ></textarea>
+      </div>
+
       <!-- Image Preview -->
       <div id="preview" class="preview" style="display:none">
         <img id="thumb" alt="Preview">
@@ -369,6 +414,7 @@
     const fileInput = document.getElementById("file");
     const styleSel  = document.getElementById("styleSel");
     const lenSel    = document.getElementById("lenSel");
+    const hintInput = document.getElementById("hint");
     const preview   = document.getElementById("preview");
     const thumb     = document.getElementById("thumb");
     const meta      = document.getElementById("meta");
@@ -424,8 +470,9 @@
         const f = fileInput.files[0];
         if(!f) return alert("Choose an image first.");
 
-        const style = STYLE_MAP[styleSel.value];
+        const style       = STYLE_MAP[styleSel.value];
         const length_hint = lenSel.value;
+        const hint        = hintInput.value || "";
 
         show("Requesting upload URL…", true);
         const up = await requestUploadURL(f);
@@ -438,12 +485,13 @@
 
         show("Creating your story…", true);
 
-        const r = await fetch(
-          api + "/generate?key=" + encodeURIComponent(up.key)
-          + "&style=" + encodeURIComponent(style)
-          + "&length_hint=" + encodeURIComponent(length_hint)
-        );
+        const url =
+          api + "/generate?key=" + encodeURIComponent(up.key) +
+          "&style=" + encodeURIComponent(style) +
+          "&length_hint=" + encodeURIComponent(length_hint) +
+          "&hint=" + encodeURIComponent(hint);
 
+        const r = await fetch(url);
         const data = await r.json();
         show(data.story, false);
 
